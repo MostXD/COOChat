@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация мессенджера</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            padding-top: 60px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        .screen.hiding {
+            animation: fadeOut 0.3s ease forwards;
+        }
+
+        .gif-container {
+            margin-bottom: 30px;
+            animation: scaleIn 0.6s ease 0.1s both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .gif-container img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .gif-container .welcome-image {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+        }
+
+        h1 {
+            color: #22c55e;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            position: relative;
+            animation: fadeInUp 0.5s ease 0.2s both;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 16px;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.5s ease 0.3s both;
+        }
+
+        .phone-number {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .input-container {
+            margin-bottom: 30px;
+            animation: fadeInUp 0.5s ease 0.4s both;
+        }
+
+        .phone-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            background-color: #f9fafb;
+        }
+
+        .phone-input:focus {
+            border-color: #22c55e;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        .phone-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #22c55e;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease 0.5s both;
+        }
+
+        .submit-btn:hover {
+            background-color: #16a34a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .code-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.5s ease 0.4s both;
+        }
+
+        .code-input {
+            width: 40px;
+            height: 50px;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+            background-color: #f9fafb;
+            color: #22c55e;
+        }
+
+        .code-input:focus {
+            border-color: #22c55e;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+            transform: scale(1.05);
+        }
+
+        .code-input.filled {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.8);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .resend-container {
+            margin-top: 20px;
+            animation: fadeInUp 0.5s ease 0.6s both;
+        }
+
+        .resend-text {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .resend-btn {
+            background: none;
+            border: none;
+            color: #22c55e;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .resend-btn:hover {
+            background-color: #f0fdf4;
+        }
+
+        .resend-btn:disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .timer {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            transform: translateY(-10px);
+        }
+
+        .error-message.show {
+            opacity: 1;
+            animation: shake 0.5s ease, fadeIn 0.3s ease;
+            transform: translateY(0);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #22c55e;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            max-width: 300px;
+            word-wrap: break-word;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Экран 1: Ввод номера телефона -->
+        <div class="screen active" id="phoneScreen">
+            <div class="gif-container">
+                <img src="hello.gif" alt="Hello" onerror="this.style.display='none'">
+            </div>
+
+            <h1>Введите свой номер телефона</h1>
+
+            <div class="input-container">
+                <input 
+                    type="tel" 
+                    id="phoneInput" 
+                    class="phone-input" 
+                    placeholder="+7 (___) ___-__-__"
+                    maxlength="18"
+                >
+            </div>
+
+            <button type="button" class="submit-btn" id="submitBtn" disabled>
+                Продолжить
+            </button>
+        </div>
+
+        <!-- Экран 2: Ввод кода -->
+        <div class="screen" id="codeScreen">
+            <div class="gif-container">
+                <img src="/Number.gif" alt="Number" onerror="this.style.display='none'">
+            </div>
+
+            <h1>Введите код</h1>
+            <p class="subtitle">
+                Мы отправили код на номер<br>
+                <span class="phone-number" id="phoneDisplay">+7 (___) ___-__-__</span>
+            </p>
+
+            <div class="code-inputs">
+                <input type="text" class="code-input" maxlength="1" id="code1" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" id="code2" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" id="code3" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" id="code4" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" id="code5" inputmode="numeric">
+                <input type="text" class="code-input" maxlength="1" id="code6" inputmode="numeric">
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                Неверный код. Попробуйте еще раз
+            </div>
+
+            <div class="resend-container">
+                <p class="resend-text">Не пришел код?</p>
+                <button class="resend-btn" id="resendBtn" disabled>
+                    Отправить повторно <span class="timer" id="timer">(60)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Экран 3: Регистрация -->
+        <div class="screen" id="registrationScreen">
+            <div class="gif-container">
+                <img src="welcome.jpeg" alt="Welcome" class="welcome-image" onerror="this.style.display='none'">
+            </div>
+
+            <h1>Добро пожаловать!</h1>
+            <p class="subtitle">Пожалуйста, представьтесь</p>
+
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    id="firstNameInput" 
+                    class="phone-input" 
+                    placeholder="Имя"
+                >
+            </div>
+
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    id="lastNameInput" 
+                    class="phone-input" 
+                    placeholder="Фамилия"
+                >
+            </div>
+
+            <button type="button" class="submit-btn" id="registerBtn" disabled>
+                Продолжить
+            </button>
+        </div>
+    </div>
+
+    <div class="debug-info" id="debugInfo">Загрузка...</div>
+
+    <script>
+        const debugInfo = document.getElementById('debugInfo');
+        
+        function log(message) {
+            console.log(message);
+            debugInfo.textContent = message;
+        }
+
+        const phoneScreen = document.getElementById('phoneScreen');
+        const codeScreen = document.getElementById('codeScreen');
+        const registrationScreen = document.getElementById('registrationScreen');
+        const phoneInput = document.getElementById('phoneInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const phoneDisplay = document.getElementById('phoneDisplay');
+        const codeInputs = document.querySelectorAll('.code-input');
+        const resendBtn = document.getElementById('resendBtn');
+        const timerSpan = document.getElementById('timer');
+        const errorMessage = document.getElementById('errorMessage');
+        const firstNameInput = document.getElementById('firstNameInput');
+        const lastNameInput = document.getElementById('lastNameInput');
+        const registerBtn = document.getElementById('registerBtn');
+
+        let timeLeft = 60;
+        let timerInterval;
+        let currentPhone = '';
+        let currentScreen = 'phone';
+
+        log('Страница загружена');
+
+        // УБИРАЕМ проверку при загрузке - она создает цикл!
+        // Теперь страница авторизации всегда доступна
+
+        if (window.history && window.history.pushState) {
+            window.history.replaceState({ screen: 'phone' }, '', '');
+        }
+
+        function isUserRegistered(phone) {
+            const users = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+            return users.hasOwnProperty(phone);
+        }
+
+        function saveUser(phone, firstName, lastName) {
+            const users = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+            users[phone] = { firstName, lastName };
+            localStorage.setItem('registeredUsers', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify({ phone, firstName, lastName }));
+            log('Пользователь сохранен: ' + phone);
+        }
+
+        function switchScreen(fromScreen, toScreen, screenName) {
+            fromScreen.classList.add('hiding');
+            setTimeout(() => {
+                fromScreen.classList.remove('active', 'hiding');
+                toScreen.classList.add('active');
+                currentScreen = screenName;
+                window.history.replaceState({ screen: screenName }, '', '');
+            }, 300);
+        }
+
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length === 0) {
+                e.target.value = '';
+                submitBtn.disabled = true;
+                return;
+            }
+            
+            if (value.length > 0) {
+                if (value[0] === '7' || value[0] === '8') {
+                    value = '7' + value.substring(1);
+                } else if (value[0] !== '7') {
+                    value = '7' + value;
+                }
+            }
+
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+
+            let formatted = '+7';
+            if (value.length > 1) {
+                formatted += ' (' + value.substring(1, 4);
+            }
+            if (value.length >= 4) {
+                formatted += ') ' + value.substring(4, 7);
+            }
+            if (value.length >= 7) {
+                formatted += '-' + value.substring(7, 9);
+            }
+            if (value.length >= 9) {
+                formatted += '-' + value.substring(9, 11);
+            }
+
+            e.target.value = formatted;
+            submitBtn.disabled = value.length < 11;
+        });
+
+        submitBtn.addEventListener('click', function() {
+            const phoneNumber = phoneInput.value;
+            currentPhone = phoneNumber;
+            log('Номер введен: ' + phoneNumber);
+            
+            phoneDisplay.textContent = phoneNumber;
+            switchScreen(phoneScreen, codeScreen, 'code');
+            
+            startTimer();
+            setTimeout(() => codeInputs[0].focus(), 500);
+        });
+
+        window.addEventListener('popstate', function(e) {
+            if (currentScreen !== 'phone') {
+                resetAuthFlow();
+            }
+        });
+
+        function resetAuthFlow() {
+            log('Сброс авторизации');
+            
+            codeScreen.classList.remove('active');
+            registrationScreen.classList.remove('active');
+            phoneScreen.classList.add('active');
+            currentScreen = 'phone';
+            
+            codeInputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('filled');
+            });
+            errorMessage.classList.remove('show');
+            firstNameInput.value = '';
+            lastNameInput.value = '';
+            registerBtn.disabled = true;
+            
+            if (timerInterval) clearInterval(timerInterval);
+            window.history.replaceState({ screen: 'phone' }, '', '');
+        }
+
+        function startTimer() {
+            timeLeft = 60;
+            resendBtn.disabled = true;
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerSpan.textContent = `(${timeLeft})`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    resendBtn.disabled = false;
+                    timerSpan.textContent = '';
+                }
+            }, 1000);
+        }
+
+        codeInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                if (value.length === 1) {
+                    input.classList.add('filled');
+                    if (index < codeInputs.length - 1) {
+                        codeInputs[index + 1].focus();
+                    } else {
+                        verifyCode();
+                    }
+                } else if (value.length === 0) {
+                    input.classList.remove('filled');
+                }
+                errorMessage.classList.remove('show');
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    codeInputs[index - 1].focus();
+                    codeInputs[index - 1].value = '';
+                    codeInputs[index - 1].classList.remove('filled');
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text').replace(/\D/g, '');
+                
+                for (let i = 0; i < Math.min(pasteData.length, 6); i++) {
+                    if (codeInputs[i]) {
+                        codeInputs[i].value = pasteData[i];
+                        codeInputs[i].classList.add('filled');
+                    }
+                }
+                if (pasteData.length >= 6) verifyCode();
+            });
+        });
+
+        function verifyCode() {
+            const code = Array.from(codeInputs).map(input => input.value).join('');
+            
+            if (code.length === 6) {
+                log('Проверка кода: ' + code);
+                
+                setTimeout(() => {
+                    if (code === '111111') {
+                        log('Код верный');
+                        
+                        if (isUserRegistered(currentPhone)) {
+                            log('Пользователь найден');
+                            const users = JSON.parse(localStorage.getItem('registeredUsers'));
+                            const user = users[currentPhone];
+                            localStorage.setItem('currentUser', JSON.stringify({ 
+                                phone: currentPhone, 
+                                firstName: user.firstName, 
+                                lastName: user.lastName 
+                            }));
+                            
+                            log('Переход на menu.html через 1 сек');
+                            setTimeout(() => {
+                                try {
+                                    window.location.href = 'menu.html';
+                                } catch (err) {
+                                    log('ОШИБКА перехода: ' + err.message);
+                                    alert('Файл menu.html не найден! Создайте его.');
+                                }
+                            }, 1000);
+                        } else {
+                            log('Новый пользователь - регистрация');
+                            switchScreen(codeScreen, registrationScreen, 'registration');
+                            setTimeout(() => firstNameInput.focus(), 500);
+                        }
+                    } else {
+                        log('Неверный код');
+                        showError();
+                    }
+                }, 500);
+            }
+        }
+
+        function showError() {
+            errorMessage.classList.add('show');
+            codeInputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('filled');
+            });
+            codeInputs[0].focus();
+        }
+
+        resendBtn.addEventListener('click', () => {
+            log('Повторная отправка кода');
+            alert('Код отправлен повторно!');
+            startTimer();
+            
+            codeInputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('filled');
+            });
+            codeInputs[0].focus();
+        });
+
+        function validateRegistrationForm() {
+            const firstName = firstNameInput.value.trim();
+            const lastName = lastNameInput.value.trim();
+            registerBtn.disabled = !(firstName.length > 0 && lastName.length > 0);
+        }
+
+        firstNameInput.addEventListener('input', validateRegistrationForm);
+        lastNameInput.addEventListener('input', validateRegistrationForm);
+
+        registerBtn.addEventListener('click', function() {
+            const firstName = firstNameInput.value.trim();
+            const lastName = lastNameInput.value.trim();
+            
+            if (firstName && lastName) {
+                log('Регистрация: ' + firstName + ' ' + lastName);
+                saveUser(currentPhone, firstName, lastName);
+                
+                log('Переход на menu.html через 1 сек');
+                setTimeout(() => {
+                    try {
+                        window.location.href = 'menu.html';
+                    } catch (err) {
+                        log('ОШИБКА перехода: ' + err.message);
+                        alert('Файл menu.html не найден! Создайте его.');
+                    }
+                }, 1000);
+            }
+        });
+
+        log('Готов к работе');
+    </script>
+</body>
+</html>

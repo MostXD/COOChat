@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мессенджер - Главная</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInFromBottom {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Overlay для переходов */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            z-index: 9999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .page-transition-overlay.active {
+            display: flex;
+            opacity: 1;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .transition-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #22c55e;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Хедер */
+        .header {
+            background-color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f3f4f6;
+            animation: slideInFromRight 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #22c55e;
+        }
+
+        .header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .header-avatar:hover {
+            transform: scale(1.05);
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        .header-avatar:active {
+            transform: scale(0.95);
+        }
+
+        .header-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header-avatar svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Поиск */
+        .search-container {
+            padding: 16px 20px;
+            background-color: white;
+            animation: slideInFromRight 0.4s ease;
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            background-color: #f9fafb;
+        }
+
+        .search-input:focus {
+            border-color: #22c55e;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        /* Список чатов */
+        .chats-container {
+            background-color: white;
+            animation: slideInFromBottom 0.5s ease;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .chat-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .chat-item:active {
+            background-color: #f3f4f6;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .chat-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .chat-time {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .chat-preview {
+            font-size: 14px;
+            color: #6b7280;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .unread-badge {
+            background-color: #22c55e;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Кнопка новый чат */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: slideInFromBottom 0.6s ease;
+            z-index: 100;
+        }
+
+        .fab:hover {
+            background-color: #16a34a;
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.5);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state h3 {
+            color: #6b7280;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* Нижняя панель навигации */
+        .bottom-nav {
+            background-color: white;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            animation: slideInFromBottom 0.5s ease;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            color: #9ca3af;
+        }
+
+        .nav-item.active {
+            color: #22c55e;
+        }
+
+        .nav-item:hover {
+            opacity: 0.7;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay для переходов -->
+    <div class="page-transition-overlay" id="transitionOverlay">
+        <div class="transition-spinner"></div>
+    </div>
+
+    <!-- Хедер -->
+    <div class="header">
+        <h1 class="header-title">Главная</h1>
+        <div class="header-avatar" id="headerAvatar">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Поиск -->
+    <div class="search-container">
+        <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Поиск чатов..."
+            id="searchInput"
+        >
+    </div>
+
+    <!-- Список чатов -->
+    <div class="chats-container" id="chatsContainer">
+        <!-- Чаты будут добавлены динамически -->
+    </div>
+
+    <!-- Кнопка нового чата -->
+    <button class="fab" id="newChatBtn">+</button>
+
+    <!-- Нижняя панель навигации -->
+    <div class="bottom-nav">
+        <button class="nav-item active" id="chatsTab">
+            <div class="nav-icon">💬</div>
+            <div class="nav-label">Чаты</div>
+        </button>
+        <button class="nav-item" id="callsTab">
+            <div class="nav-icon">📞</div>
+            <div class="nav-label">Звонки</div>
+        </button>
+    </div>
+
+    <script>
+        // Функция плавного перехода между страницами
+        function navigateToPage(url) {
+            const overlay = document.getElementById('transitionOverlay');
+            overlay.classList.add('active');
+            
+            setTimeout(() => {
+                window.location.href = url;
+            }, 300);
+        }
+
+        // Получаем данные текущего пользователя
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+        // Проверяем авторизацию
+        if (!currentUser.phone || !currentUser.firstName) {
+            navigateToPage('auto.html');
+        }
+
+        // Функция обновления аватара в хедере
+        function updateHeaderAvatar() {
+            const headerAvatar = document.getElementById('headerAvatar');
+            
+            if (currentUser.avatar) {
+                headerAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="Avatar">`;
+            } else if (currentUser.firstName) {
+                headerAvatar.textContent = currentUser.firstName.charAt(0).toUpperCase();
+            } else {
+                headerAvatar.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                `;
+            }
+        }
+
+        // Обновляем аватар при загрузке
+        updateHeaderAvatar();
+
+        // Обработчик клика на аватар - переход в профиль
+        document.getElementById('headerAvatar').addEventListener('click', () => {
+            navigateToPage('profile.html');
+        });
+
+        // Тестовые данные чатов
+        const mockChats = [];
+
+        // Отображение чатов
+        const chatsContainer = document.getElementById('chatsContainer');
+
+        function renderChats(chats) {
+            if (chats.length === 0) {
+                chatsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Нет чатов</h3>
+                        <p>Начните новый диалог, нажав на кнопку +</p>
+                    </div>
+                `;
+                return;
+            }
+
+            chatsContainer.innerHTML = chats.map(chat => `
+                <div class="chat-item" data-chat-id="${chat.id}">
+                    <div class="chat-avatar">${chat.avatar}</div>
+                    <div class="chat-info">
+                        <div class="chat-header">
+                            <span class="chat-name">${chat.name}</span>
+                            <span class="chat-time">${chat.time}</span>
+                        </div>
+                        <div class="chat-preview">${chat.preview}</div>
+                    </div>
+                    ${chat.unread > 0 ? `<div class="unread-badge">${chat.unread}</div>` : ''}
+                </div>
+            `).join('');
+
+            // Добавляем обработчики кликов на чаты
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const chatId = item.dataset.chatId;
+                    console.log('Открыт чат:', chatId);
+                    alert(`Чат ${chatId} (функция в разработке)`);
+                });
+            });
+        }
+
+        renderChats(mockChats);
+
+        // Поиск чатов
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredChats = mockChats.filter(chat => 
+                chat.name.toLowerCase().includes(searchTerm) ||
+                chat.preview.toLowerCase().includes(searchTerm)
+            );
+            renderChats(filteredChats);
+        });
+
+        // Новый чат
+        document.getElementById('newChatBtn').addEventListener('click', () => {
+            console.log('Создание нового чата');
+            alert('Создание нового чата (функция в разработке)');
+        });
+
+        // Навигация
+        const chatsTab = document.getElementById('chatsTab');
+        const callsTab = document.getElementById('callsTab');
+
+        callsTab.addEventListener('click', () => {
+            alert('Скоро будет');
+        });
+
+        // Обработка кнопки "Назад" браузера
+        let backPressedOnce = false;
+        
+        window.addEventListener('popstate', function(event) {
+            event.preventDefault();
+            
+            if (!backPressedOnce) {
+                backPressedOnce = true;
+                alert('Нажмите "Назад" еще раз для выхода');
+                history.pushState(null, null, location.href);
+                
+                setTimeout(() => {
+                    backPressedOnce = false;
+                }, 2000);
+            } else {
+                localStorage.removeItem('currentUser');
+                navigateToPage('auto.html');
+            }
+        });
+        
+        // Создаем начальное состояние истории
+        history.pushState(null, null, location.href);
+
+        // Обновляем аватар при возврате на страницу
+        window.addEventListener('focus', () => {
+            const updatedUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (JSON.stringify(updatedUser) !== JSON.stringify(currentUser)) {
+                Object.assign(currentUser, updatedUser);
+                updateHeaderAvatar();
+            }
+        });
+
+        // Обработка события pageshow для обновления после возврата назад
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                // Страница загружена из кэша (bfcache)
+                const updatedUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                Object.assign(currentUser, updatedUser);
+                updateHeaderAvatar();
+            }
+        });
+    </script>
+</body>
+</html>
